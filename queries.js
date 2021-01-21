@@ -114,6 +114,8 @@ export async function getNumberOfSentEmailSince(time) {
       GRAPH ?g {
         ?email a nmo:Email ;
           nmo:sentDate ?sentDate .
+      }
+      GRAPH ?h {
         ?complaint ext:isConvertedIntoEmail ?email .
       }
       FILTER (STR(?sentDate) >= STR(${sparqlEscapeDateTime(time)}))
