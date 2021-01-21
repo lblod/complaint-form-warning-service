@@ -3,7 +3,7 @@
 Service that generates warning emails when no complaints are sent during the business day.
 
 Two cron jobs can be configured with cron jobs. Each one checks if complaint emails have been
-sent from the beggining of the business day (8h) to the time at which the cron job runs. If no
+sent from the beginning of the business day (8h) to the time at which the cron job runs. If no
 emails were sent, the service generates a warning email.
 
 ## Installation
