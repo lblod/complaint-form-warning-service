@@ -147,8 +147,8 @@ export async function createWarningEmail(taskUri) {
           nmo:messageFrom ${sparqlEscapeString(EMAIL_FROM)} ;
           nmo:emailTo ${sparqlEscapeString(EMAIL_TO)} ;
           nmo:messageSubject ${sparqlEscapeString(WARNING_EMAIL_SUBJECT)} ;
-          nmo:plainTextMessageContent ""${sparqlEscapeString(WARNING_EMAIL_TEXT)}"" ;
-          nmo:htmlMessageContent ""${sparqlEscapeString(WARNING_EMAIL_HTML)}"" ;
+          nmo:plainTextMessageContent ${sparqlEscapeString(WARNING_EMAIL_TEXT)} ;
+          nmo:htmlMessageContent ${sparqlEscapeString(WARNING_EMAIL_HTML)} ;
           nmo:sentDate ${sparqlEscapeDateTime(now)} ;
           nmo:isPartOf ${sparqlEscapeUri(OUTBOX)} .
       }
