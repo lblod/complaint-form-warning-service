@@ -55,7 +55,6 @@ async function checkSentEmails() {
 
     console.log(`${numberOfSentEmails} complaint emails have been sent today.`);
     if (numberOfSentEmails == 0) {
-      throw 'test error :p';
       await createWarningEmail(taskUri);
     }
 
