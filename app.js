@@ -61,7 +61,7 @@ async function checkSentEmails() {
     await updateStatus(jobUri, STATUS_SUCCESS);
     await updateStatus(taskUri, STATUS_SUCCESS);
   } catch (err) {
-    console.log(`An error occured when checking emails: ${err}`);
+    console.log(`An error occurred when checking emails: ${err}`);
     await addError(jobUri, err);
     await updateStatus(jobUri, STATUS_FAILED);
     await updateStatus(taskUri, STATUS_FAILED);
