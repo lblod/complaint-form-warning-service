@@ -15,6 +15,8 @@ app.get('/', function( req, res ) {
   res.send('Hello from complaint-form-warning :)');
 } );
 
+checkRequiredEnv();
+
 // Cron jobs
 
 new CronJob(FIRST_CHECK_CRON, async function() {
@@ -38,6 +40,13 @@ new CronJob(SECOND_CHECK_CRON, async function() {
 }, null, true, "Europe/Brussels");
 
 // Internal logic
+
+function checkRequiredEnv() {
+  if (!process.env.EMAIL_FROM || !process.env.EMAIL_TO) {
+    throw new Error(
+      "For this service to work the environment variables EMAIL_FROM and EMAIL_TO should be configured.\n");
+  }
+}
 
 /**
  * Checks if emails related to complains have been sent during the business day until now

@@ -14,6 +14,9 @@ To add the service to your `mu.semte.ch` stack, add the following snippet to doc
 services:
   complaint-form-warning:
     image: lblod/complaint-form-warning-service:x.x.x
+    environment:
+      EMAIL_FROM: "from@test.com"
+      EMAIL_TO: "to@test.com"
 ```
 
 ### Environment variables
@@ -22,10 +25,10 @@ Provided [environment variables](https://docs.docker.com/compose/environment-var
 
 | Name                | Description                              | Default                         |
 | ------------------- | ---------------------------------------- | ------------------------------- |
-| `FIRST_CHECK_CRON`  | The first cron job rule (CET)            | `0 0 14 * * 1-5`                |
-| `SECOND_CHECK_CRON` | The second cron job rule (CET)           | `0 0 16 * *  1-5`               |
 | `EMAIL_FROM`        | Email address from which emails are sent | `noreply@lblod.info`            |
 | `EMAIL_TO`          | Email address to which emails are sent   | `binnenland@vlaanderen.be`      |
+| `FIRST_CHECK_CRON`  | The first cron job rule (CET)            | `0 0 14 * * 1-5`                |
+| `SECOND_CHECK_CRON` | The second cron job rule (CET)           | `0 0 16 * * 1-5`                |
 
 ## Development
 
