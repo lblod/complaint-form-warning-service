@@ -1,4 +1,4 @@
-import { app, query, errorHandler } from 'mu';
+import { app, errorHandler } from 'mu';
 import { CronJob } from 'cron';
 import { FIRST_CHECK_CRON, SECOND_CHECK_CRON } from './config';
 import { STATUS_BUSY, STATUS_SUCCESS, STATUS_FAILED } from './constants';
@@ -23,7 +23,7 @@ new CronJob(FIRST_CHECK_CRON, async function() {
   try {
     await checkSentEmails();
   } catch (err) {
-    console.log(`An error occured during first check at ${now}: ${err}`)
+    console.log(`An error occurred during first check at ${now}: ${err}`)
   }
 }, null, true, "Europe/Brussels");
 
@@ -33,7 +33,7 @@ new CronJob(SECOND_CHECK_CRON, async function() {
   try {
     await checkSentEmails();
   } catch (err) {
-    console.log(`An error occured during first check at ${now}: ${err}`)
+    console.log(`An error occurred during first check at ${now}: ${err}`)
   }
 }, null, true, "Europe/Brussels");
 
@@ -54,7 +54,7 @@ async function checkSentEmails() {
     const numberOfSentEmails = await getNumberOfSentEmailSince(startOfBusinessDay);
 
     console.log(`${numberOfSentEmails} complaint emails have been sent today.`);
-    if (numberOfSentEmails == 0) {
+    if (numberOfSentEmails === 0) {
       await createWarningEmail(taskUri);
     }
 
