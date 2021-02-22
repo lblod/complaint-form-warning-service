@@ -25,8 +25,8 @@ Provided [environment variables](https://docs.docker.com/compose/environment-var
 
 | Name                | Description                              | Default                         |
 | ------------------- | ---------------------------------------- | ------------------------------- |
-| `EMAIL_FROM`        | Email address from which emails are sent | `noreply@lblod.info`            |
-| `EMAIL_TO`          | Email address to which emails are sent   | `binnenland@vlaanderen.be`      |
+| `EMAIL_FROM`        | Email address from which emails are sent |                                 |
+| `EMAIL_TO`          | Email address to which emails are sent   |                                 |
 | `FIRST_CHECK_CRON`  | The first cron job rule (CET)            | `0 0 14 * * 1-5`                |
 | `SECOND_CHECK_CRON` | The second cron job rule (CET)           | `0 0 16 * * 1-5`                |
 
