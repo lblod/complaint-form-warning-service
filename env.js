@@ -1,5 +1,7 @@
 import envvar from 'env-var';
 
+export const RUN_MODE = envvar.get('NODE_ENV').default('production').asString();
+
 // Every weekday at 14h CET
 export const FIRST_CHECK_CRON = envvar
   .get('FIRST_CHECK_CRON')

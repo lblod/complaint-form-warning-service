@@ -41,6 +41,24 @@ new CronJob(
   'Europe/Brussels',
 );
 
+/**
+ * This protects the `/test` route so that is only accessible when the
+ * container runs in development mode.
+ */
+app.use('/test', async function (req, res, next) {
+  if (/development/.test(env.RUN_MODE)) next();
+  else
+    res
+      .status(401)
+      .send(
+        'This route has been disabled, because it is for testing purposes only.',
+      );
+});
+app.post('/test', async function (req, res) {
+  await checkSentEmails();
+  res.send(200).end();
+});
+
 app.use(errorHandler);
 
 // Internal logic
