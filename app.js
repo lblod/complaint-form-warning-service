@@ -1,14 +1,7 @@
 import * as env from './env';
+import * as que from './queries';
 import { app, errorHandler } from 'mu';
 import { CronJob } from 'cron';
-import {
-  createJob,
-  createTask,
-  updateStatus,
-  getNumberOfSentEmailSince,
-  createWarningEmail,
-  addError,
-} from './queries';
 
 app.get('/', function (req, res) {
   res.send('Hello from complaint-form-warning :)');
@@ -54,11 +47,11 @@ new CronJob(
  * Checks if emails related to complains have been sent during the business day until now
  */
 async function checkSentEmails() {
-  const jobUri = await createJob();
-  const taskUri = await createTask(jobUri);
+  const jobUri = await que.createJob();
+  const taskUri = await que.createTask(jobUri);
   try {
-    await updateStatus(jobUri, env.STATUS_BUSY);
-    await updateStatus(taskUri, env.STATUS_BUSY);
+    await que.updateStatus(jobUri, env.STATUS_BUSY);
+    await que.updateStatus(taskUri, env.STATUS_BUSY);
 
     const now = new Date();
     const startOfBusinessDay = new Date(
@@ -70,20 +63,20 @@ async function checkSentEmails() {
       0,
     ); // today at 8h
     const numberOfSentEmails =
-      await getNumberOfSentEmailSince(startOfBusinessDay);
+      await que.getNumberOfSentEmailSince(startOfBusinessDay);
 
     console.log(`${numberOfSentEmails} complaint emails have been sent today.`);
     if (numberOfSentEmails === 0) {
-      await createWarningEmail(taskUri);
+      await que.createWarningEmail(taskUri);
     }
 
-    await updateStatus(jobUri, env.STATUS_SUCCESS);
-    await updateStatus(taskUri, env.STATUS_SUCCESS);
+    await que.updateStatus(jobUri, env.STATUS_SUCCESS);
+    await que.updateStatus(taskUri, env.STATUS_SUCCESS);
   } catch (err) {
     console.log(`An error occurred when checking emails: ${err}`);
-    await addError(jobUri, err);
-    await updateStatus(jobUri, env.STATUS_FAILED);
-    await updateStatus(taskUri, env.STATUS_FAILED);
+    await que.addError(jobUri, err);
+    await que.updateStatus(jobUri, env.STATUS_FAILED);
+    await que.updateStatus(taskUri, env.STATUS_FAILED);
   }
 }
 
