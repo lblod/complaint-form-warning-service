@@ -179,7 +179,7 @@ export async function sendErrorAlert(message, detail, task, job) {
           dct:subject ${mu.sparqlEscapeString(subject)} ;
           oslc:message ${mu.sparqlEscapeString(message)} ;
           dct:created ${mu.sparqlEscapeDateTime(new Date().toISOString())} ;
-          dct:creator ${mu.sparqlEscapeUri(env.creator)} .
+          dct:creator ${mu.sparqlEscapeUri(env.SERVICE_NAME)} .
         ${referenceJobTriple}
         ${referenceTaskTriple}
         ${detailTriple}
