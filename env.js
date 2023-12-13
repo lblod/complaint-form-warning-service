@@ -23,7 +23,7 @@ export const STATUS_SUCCESS =
 export const STATUS_FAILED =
   'http://redpencil.data.gift/id/concept/JobStatus/failed';
 
-export const JOB_GRAPH = 'http://mu.semte.ch/graphs/harvesting';
+export const JOB_GRAPH = 'http://mu.semte.ch/graphs/jobs';
 export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email';
 export const ERROR_GRAPH = 'http://mu.semte.ch/graphs/error';
 
