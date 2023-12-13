@@ -1,12 +1,13 @@
 import * as env from './env';
 import * as mas from '@lblod/mu-auth-sudo';
 import * as mu from 'mu';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Creates a new job in the store
  */
 export async function createJob() {
-  const jobUuid = mu.uuid();
+  const jobUuid = uuid();
   const jobUri = `${env.JOB_URI_PREFIX}${jobUuid}`;
   const now = new Date().toISOString();
 
@@ -32,7 +33,7 @@ export async function createJob() {
  * Creates a new task linked to a job in the store
  */
 export async function createTask(jobUri) {
-  const taskUuid = mu.uuid();
+  const taskUuid = uuid();
   const taskUri = `${env.TASK_URI_PREFIX}${taskUuid}`;
   const now = new Date().toISOString();
 
@@ -108,9 +109,9 @@ export async function getNumberOfSentEmailSince(time) {
  * Creates a warning email in the store and put it in the outbox
  */
 export async function createWarningEmail(taskUri) {
-  const containerUuid = mu.uuid();
+  const containerUuid = uuid();
   const containerUri = `${env.CONTAINER_URI_PREFIX}${containerUuid}`;
-  const emailUuid = mu.uuid();
+  const emailUuid = uuid();
   const emailUri = `${env.EMAIL_URI_PREFIX}${emailUuid}`;
   const now = new Date().toISOString();
 
