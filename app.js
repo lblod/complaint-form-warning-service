@@ -44,7 +44,7 @@ new CronJob(
 // Internal logic
 
 /**
- * Checks if emails related to complains have been sent during the business day until now
+ * Checks if emails related to complaints have been sent during the business day until now
  */
 async function checkSentEmails() {
   const jobUri = await que.createJob();
