@@ -107,7 +107,7 @@ async function checkSentEmails() {
     }
   } catch (generalError) {
     const generalErrorMsg =
-      'A general error prevented the start of a Job or Task for checking sent complaint emails.';
+      'A general error prevented the start of a Job or Task about checking sent complaint emails, or there was an error when dealing with errors in the Job or Task (perhaps a very serious issue like an offline database).';
     console.error(generalErrorMsg);
     await que.sendErrorAlert(generalErrorMsg, generalError.message);
   }
