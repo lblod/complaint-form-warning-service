@@ -1,3 +1,19 @@
+import envvar from 'env-var';
+
+// Every weekday at 14h CET
+export const FIRST_CHECK_CRON = envvar
+  .get('FIRST_CHECK_CRON')
+  .default('0 0 14 * * 1-5')
+  .asString();
+// Every weekday at 16h CET
+export const SECOND_CHECK_CRON = envvar
+  .get('SECOND_CHECK_CRON')
+  .default('0 0 16 * * 1-5')
+  .asString();
+
+export const EMAIL_FROM = envvar.get('EMAIL_FROM').required().asString();
+export const EMAIL_TO = envvar.get('EMAIL_TO').required().asString();
+
 export const STATUS_BUSY =
   'http://redpencil.data.gift/id/concept/JobStatus/busy';
 export const STATUS_SCHEDULED =

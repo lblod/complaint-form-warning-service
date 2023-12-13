@@ -1,7 +1,6 @@
+import * as env from './env';
 import { app, errorHandler } from 'mu';
 import { CronJob } from 'cron';
-import { FIRST_CHECK_CRON, SECOND_CHECK_CRON } from './config';
-import { STATUS_BUSY, STATUS_SUCCESS, STATUS_FAILED } from './constants';
 import {
   createJob,
   createTask,
@@ -15,12 +14,10 @@ app.get('/', function (req, res) {
   res.send('Hello from complaint-form-warning :)');
 });
 
-checkRequiredEnv();
-
 // Cron jobs
 
 new CronJob(
-  FIRST_CHECK_CRON,
+  env.FIRST_CHECK_CRON,
   async function () {
     const now = new Date().toISOString();
     console.log(`First check triggered by cron job at ${now}`);
@@ -36,7 +33,7 @@ new CronJob(
 );
 
 new CronJob(
-  SECOND_CHECK_CRON,
+  env.SECOND_CHECK_CRON,
   async function () {
     const now = new Date().toISOString();
     console.log(`Second check triggered by cron job at ${now}`);
@@ -53,14 +50,6 @@ new CronJob(
 
 // Internal logic
 
-function checkRequiredEnv() {
-  if (!process.env.EMAIL_FROM || !process.env.EMAIL_TO) {
-    throw new Error(
-      'For this service to work the environment variables EMAIL_FROM and EMAIL_TO should be configured.\n',
-    );
-  }
-}
-
 /**
  * Checks if emails related to complains have been sent during the business day until now
  */
@@ -68,8 +57,8 @@ async function checkSentEmails() {
   const jobUri = await createJob();
   const taskUri = await createTask(jobUri);
   try {
-    await updateStatus(jobUri, STATUS_BUSY);
-    await updateStatus(taskUri, STATUS_BUSY);
+    await updateStatus(jobUri, env.STATUS_BUSY);
+    await updateStatus(taskUri, env.STATUS_BUSY);
 
     const now = new Date();
     const startOfBusinessDay = new Date(
@@ -88,13 +77,13 @@ async function checkSentEmails() {
       await createWarningEmail(taskUri);
     }
 
-    await updateStatus(jobUri, STATUS_SUCCESS);
-    await updateStatus(taskUri, STATUS_SUCCESS);
+    await updateStatus(jobUri, env.STATUS_SUCCESS);
+    await updateStatus(taskUri, env.STATUS_SUCCESS);
   } catch (err) {
     console.log(`An error occurred when checking emails: ${err}`);
     await addError(jobUri, err);
-    await updateStatus(jobUri, STATUS_FAILED);
-    await updateStatus(taskUri, STATUS_FAILED);
+    await updateStatus(jobUri, env.STATUS_FAILED);
+    await updateStatus(taskUri, env.STATUS_FAILED);
   }
 }
 
