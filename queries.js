@@ -145,23 +145,48 @@ export async function createWarningEmail(taskUri) {
 }
 
 /**
- * Adds an error resource to the given job
+ * Stores an error and links to a given Job and/or Task
  */
-export async function addError(jobUri, error) {
-  const errorUuid = mu.uuid();
-  const errorUri = `${env.ERROR_URI_PREFIX}${errorUuid}`;
+export async function sendErrorAlert(message, detail, task, job) {
+  const id = uuid();
+  const uri = `${env.ERROR_URI_PREFIX}${id}`;
+  const subject = 'Error - Complaint Form Warning Service';
+  const referenceJobTriple = job
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(job)} .`
+    : '';
+  const referenceTaskTriple = task
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(task)} .`
+    : '';
+  const detailTriple = detail
+    ? `${mu.sparqlEscapeUri(uri)}
+         oslc:largePreview ${mu.sparqlEscapeString(detail)} .`
+    : '';
 
-  const q = `
+  const insertErrorQuery = `
     ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${mu.sparqlEscapeUri(env.JOB_GRAPH)} {
-        ${mu.sparqlEscapeUri(jobUri)}
-          task:error ${mu.sparqlEscapeUri(errorUri)} .
-        ${mu.sparqlEscapeUri(errorUri)} a oslc:Error ;
-          mu:uuid ${mu.sparqlEscapeString(errorUuid)} ;
-          oslc:message ${mu.sparqlEscapeString(error)} .
+      GRAPH ${mu.sparqlEscapeUri(env.ERROR_GRAPH)} {
+        ${mu.sparqlEscapeUri(uri)}
+          rdf:type oslc:Error ;
+          mu:uuid ${mu.sparqlEscapeString(id)} ;
+          dct:subject ${mu.sparqlEscapeString(subject)} ;
+          oslc:message ${mu.sparqlEscapeString(message)} ;
+          dct:created ${mu.sparqlEscapeDateTime(new Date().toISOString())} ;
+          dct:creator ${mu.sparqlEscapeUri(env.creator)} .
+        ${referenceJobTriple}
+        ${referenceTaskTriple}
+        ${detailTriple}
       }
-    }
-  `;
-  await mas.updateSudo(q);
+    }`;
+  try {
+    await mas.updateSudo(insertErrorQuery);
+    return uri;
+  } catch (e) {
+    console.error(
+      `[ERROR] Something went wrong while trying to store an error.\nMessage: ${e}\nQuery: ${insertErrorQuery}`,
+    );
+    throw e;
+  }
 }

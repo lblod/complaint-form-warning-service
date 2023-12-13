@@ -25,6 +25,7 @@ export const STATUS_FAILED =
 
 export const JOB_GRAPH = 'http://mu.semte.ch/graphs/harvesting';
 export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email';
+export const ERROR_GRAPH = 'http://mu.semte.ch/graphs/error';
 
 export const JOB_TYPE = 'http://vocab.deri.ie/cogs#Job';
 export const TASK_TYPE = 'http://redpencil.data.gift/vocabularies/tasks/Task';
@@ -45,6 +46,8 @@ export const CHECK_SENT_EMAILS_OPERATION =
   'http://lblod.data.gift/id/jobs/concept/JobOperation/checkSentEmails';
 
 export const PREFIXES = `
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
   PREFIX task: <http://redpencil.data.gift/vocabularies/tasks/>
   PREFIX dct: <http://purl.org/dc/terms/>
