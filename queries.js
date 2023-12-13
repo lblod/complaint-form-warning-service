@@ -1,5 +1,10 @@
 import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
-import { sparqlEscapeString, sparqlEscapeUri, sparqlEscapeDateTime, uuid } from 'mu';
+import {
+  sparqlEscapeString,
+  sparqlEscapeUri,
+  sparqlEscapeDateTime,
+  uuid,
+} from 'mu';
 import {
   PREFIXES,
   SERVICE_NAME,
@@ -18,12 +23,9 @@ import {
   OUTBOX,
   WARNING_EMAIL_SUBJECT,
   WARNING_EMAIL_TEXT,
-  WARNING_EMAIL_HTML
+  WARNING_EMAIL_HTML,
 } from './constants';
-import {
-  EMAIL_FROM,
-  EMAIL_TO
-} from './config';
+import { EMAIL_FROM, EMAIL_TO } from './config';
 
 /**
  * Creates a new job in the store
@@ -68,7 +70,7 @@ export async function createTask(jobUri) {
           dct:created ${sparqlEscapeDateTime(now)} ;
           dct:modified ${sparqlEscapeDateTime(now)} ;
           task:operation ${sparqlEscapeUri(CHECK_SENT_EMAILS_OPERATION)} ;
-          task:index ${sparqlEscapeString("0")} ;
+          task:index ${sparqlEscapeString('0')} ;
           dct:isPartOf ${sparqlEscapeUri(jobUri)} ;
           adms:status ${sparqlEscapeUri(STATUS_SCHEDULED)} .
       }
@@ -140,8 +142,12 @@ export async function createWarningEmail(taskUri) {
     ${PREFIXES}
     INSERT DATA {
       GRAPH ${sparqlEscapeUri(JOB_GRAPH)} {
-        ${sparqlEscapeUri(taskUri)} task:resultsContainer ${sparqlEscapeUri(containerUri)} .
-        ${sparqlEscapeUri(containerUri)} task:hasEmail ${sparqlEscapeUri(emailUri)} .
+        ${sparqlEscapeUri(taskUri)}
+          task:resultsContainer
+            ${sparqlEscapeUri(containerUri)} .
+        ${sparqlEscapeUri(containerUri)}
+          task:hasEmail
+            ${sparqlEscapeUri(emailUri)} .
       }
       GRAPH ${sparqlEscapeUri(EMAIL_GRAPH)} {
         ${sparqlEscapeUri(emailUri)} a nmo:Email ;
@@ -149,14 +155,15 @@ export async function createWarningEmail(taskUri) {
           nmo:messageFrom ${sparqlEscapeString(EMAIL_FROM)} ;
           nmo:emailTo ${sparqlEscapeString(EMAIL_TO)} ;
           nmo:messageSubject ${sparqlEscapeString(WARNING_EMAIL_SUBJECT)} ;
-          nmo:plainTextMessageContent ${sparqlEscapeString(WARNING_EMAIL_TEXT)} ;
+          nmo:plainTextMessageContent
+            ${sparqlEscapeString(WARNING_EMAIL_TEXT)} ;
           nmo:htmlMessageContent ${sparqlEscapeString(WARNING_EMAIL_HTML)} ;
           nmo:sentDate ${sparqlEscapeDateTime(now)} ;
           nmo:isPartOf ${sparqlEscapeUri(OUTBOX)} .
       }
     }
   `;
-  const result = await update(q);
+  await update(q);
 }
 
 /**

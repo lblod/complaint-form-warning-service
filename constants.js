@@ -1,24 +1,32 @@
-export const STATUS_BUSY = 'http://redpencil.data.gift/id/concept/JobStatus/busy';
-export const STATUS_SCHEDULED = 'http://redpencil.data.gift/id/concept/JobStatus/scheduled';
-export const STATUS_SUCCESS = 'http://redpencil.data.gift/id/concept/JobStatus/success';
-export const STATUS_FAILED = 'http://redpencil.data.gift/id/concept/JobStatus/failed';
+export const STATUS_BUSY =
+  'http://redpencil.data.gift/id/concept/JobStatus/busy';
+export const STATUS_SCHEDULED =
+  'http://redpencil.data.gift/id/concept/JobStatus/scheduled';
+export const STATUS_SUCCESS =
+  'http://redpencil.data.gift/id/concept/JobStatus/success';
+export const STATUS_FAILED =
+  'http://redpencil.data.gift/id/concept/JobStatus/failed';
 
 export const JOB_GRAPH = 'http://mu.semte.ch/graphs/harvesting';
-export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email'
+export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email';
 
 export const JOB_TYPE = 'http://vocab.deri.ie/cogs#Job';
 export const TASK_TYPE = 'http://redpencil.data.gift/vocabularies/tasks/Task';
-export const ERROR_TYPE= 'http://open-services.net/ns/core#Error';
+export const ERROR_TYPE = 'http://open-services.net/ns/core#Error';
 
 export const JOB_URI_PREFIX = 'http://redpencil.data.gift/id/job/';
 export const TASK_URI_PREFIX = 'http://redpencil.data.gift/id/task/';
 export const ERROR_URI_PREFIX = 'http://redpencil.data.gift/id/jobs/error/';
 export const EMAIL_URI_PREFIX = 'http://data.lblod.info/id/emails/';
-export const CONTAINER_URI_PREFIX = 'http://redpencil.data.gift/id/dataContainers/'
+export const CONTAINER_URI_PREFIX =
+  'http://redpencil.data.gift/id/dataContainers/';
 
-export const SERVICE_NAME = 'http://lblod.data.gift/services/complaint-form-warning-service';
-export const JOB_OPERATION = 'http://lblod.data.gift/id/jobs/concept/JobOperation/complaintFormWarning';
-export const CHECK_SENT_EMAILS_OPERATION = 'http://lblod.data.gift/id/jobs/concept/JobOperation/checkSentEmails';
+export const SERVICE_NAME =
+  'http://lblod.data.gift/services/complaint-form-warning-service';
+export const JOB_OPERATION =
+  'http://lblod.data.gift/id/jobs/concept/JobOperation/complaintFormWarning';
+export const CHECK_SENT_EMAILS_OPERATION =
+  'http://lblod.data.gift/id/jobs/concept/JobOperation/checkSentEmails';
 
 export const PREFIXES = `
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>

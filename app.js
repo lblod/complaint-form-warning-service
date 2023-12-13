@@ -8,43 +8,56 @@ import {
   updateStatus,
   getNumberOfSentEmailSince,
   createWarningEmail,
-  addError
+  addError,
 } from './queries';
 
-app.get('/', function( req, res ) {
+app.get('/', function (req, res) {
   res.send('Hello from complaint-form-warning :)');
-} );
+});
 
 checkRequiredEnv();
 
 // Cron jobs
 
-new CronJob(FIRST_CHECK_CRON, async function() {
-  const now = new Date().toISOString();
-  console.log(`First check triggered by cron job at ${now}`);
-  try {
-    await checkSentEmails();
-  } catch (err) {
-    console.log(`An error occurred during first check at ${now}: ${err}`)
-  }
-}, null, true, "Europe/Brussels");
+new CronJob(
+  FIRST_CHECK_CRON,
+  async function () {
+    const now = new Date().toISOString();
+    console.log(`First check triggered by cron job at ${now}`);
+    try {
+      await checkSentEmails();
+    } catch (err) {
+      console.log(`An error occurred during first check at ${now}: ${err}`);
+    }
+  },
+  null,
+  true,
+  'Europe/Brussels',
+);
 
-new CronJob(SECOND_CHECK_CRON, async function() {
-  const now = new Date().toISOString();
-  console.log(`Second check triggered by cron job at ${now}`);
-  try {
-    await checkSentEmails();
-  } catch (err) {
-    console.log(`An error occurred during first check at ${now}: ${err}`)
-  }
-}, null, true, "Europe/Brussels");
+new CronJob(
+  SECOND_CHECK_CRON,
+  async function () {
+    const now = new Date().toISOString();
+    console.log(`Second check triggered by cron job at ${now}`);
+    try {
+      await checkSentEmails();
+    } catch (err) {
+      console.log(`An error occurred during first check at ${now}: ${err}`);
+    }
+  },
+  null,
+  true,
+  'Europe/Brussels',
+);
 
 // Internal logic
 
 function checkRequiredEnv() {
   if (!process.env.EMAIL_FROM || !process.env.EMAIL_TO) {
     throw new Error(
-      "For this service to work the environment variables EMAIL_FROM and EMAIL_TO should be configured.\n");
+      'For this service to work the environment variables EMAIL_FROM and EMAIL_TO should be configured.\n',
+    );
   }
 }
 
@@ -59,8 +72,16 @@ async function checkSentEmails() {
     await updateStatus(taskUri, STATUS_BUSY);
 
     const now = new Date();
-    const startOfBusinessDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0); // today at 8h
-    const numberOfSentEmails = await getNumberOfSentEmailSince(startOfBusinessDay);
+    const startOfBusinessDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      8,
+      0,
+      0,
+    ); // today at 8h
+    const numberOfSentEmails =
+      await getNumberOfSentEmailSince(startOfBusinessDay);
 
     console.log(`${numberOfSentEmails} complaint emails have been sent today.`);
     if (numberOfSentEmails === 0) {
