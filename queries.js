@@ -60,7 +60,10 @@ export async function createTask(jobUri) {
 /**
  * Updates the status of the given resource
  */
-export async function updateStatus(uri, status) {
+export async function updateStatus(uri, status, errUri) {
+  const errorTriple = errUri
+    ? `${mu.sparqlEscapeUri(uri)} task:error ${mu.sparqlEscapeUri(errUri)} .`
+    : '';
   const q = `
     ${env.PREFIXES}
     DELETE {
@@ -71,6 +74,7 @@ export async function updateStatus(uri, status) {
     INSERT {
       GRAPH ?g {
         ${mu.sparqlEscapeUri(uri)} adms:status ${mu.sparqlEscapeUri(status)} .
+        ${errorTriple}
       }
     }
     WHERE {
