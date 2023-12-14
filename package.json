@@ -1,6 +1,6 @@
 {
   "name": "complaint-form-warning-service",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Service that generates warning emails when no complaints are sent during the day",
   "main": "app.js",
   "repository": {
