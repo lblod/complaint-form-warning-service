@@ -1,53 +1,31 @@
-import { querySudo as query, updateSudo as update } from '@lblod/mu-auth-sudo';
-import { sparqlEscapeString, sparqlEscapeUri, sparqlEscapeDateTime, uuid } from 'mu';
-import {
-  PREFIXES,
-  SERVICE_NAME,
-  JOB_GRAPH,
-  EMAIL_GRAPH,
-  JOB_URI_PREFIX,
-  TASK_URI_PREFIX,
-  EMAIL_URI_PREFIX,
-  ERROR_URI_PREFIX,
-  CONTAINER_URI_PREFIX,
-  JOB_TYPE,
-  TASK_TYPE,
-  STATUS_SCHEDULED,
-  JOB_OPERATION,
-  CHECK_SENT_EMAILS_OPERATION,
-  OUTBOX,
-  WARNING_EMAIL_SUBJECT,
-  WARNING_EMAIL_TEXT,
-  WARNING_EMAIL_HTML
-} from './constants';
-import {
-  EMAIL_FROM,
-  EMAIL_TO
-} from './config';
+import * as env from './env';
+import * as mas from '@lblod/mu-auth-sudo';
+import * as mu from 'mu';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Creates a new job in the store
  */
 export async function createJob() {
   const jobUuid = uuid();
-  const jobUri = `${JOB_URI_PREFIX}${jobUuid}`;
+  const jobUri = `${env.JOB_URI_PREFIX}${jobUuid}`;
   const now = new Date().toISOString();
 
   const q = `
-    ${PREFIXES}
+    ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${sparqlEscapeUri(JOB_GRAPH)} {
-        ${sparqlEscapeUri(jobUri)} a ${sparqlEscapeUri(JOB_TYPE)} ;
-          mu:uuid ${sparqlEscapeString(jobUuid)} ;
-          dct:creator ${sparqlEscapeUri(SERVICE_NAME)} ;
-          dct:created ${sparqlEscapeDateTime(now)} ;
-          dct:modified ${sparqlEscapeDateTime(now)} ;
-          task:operation ${sparqlEscapeUri(JOB_OPERATION)} ;
-          adms:status ${sparqlEscapeUri(STATUS_SCHEDULED)} .
+      GRAPH ${mu.sparqlEscapeUri(env.JOB_GRAPH)} {
+        ${mu.sparqlEscapeUri(jobUri)} a ${mu.sparqlEscapeUri(env.JOB_TYPE)} ;
+          mu:uuid ${mu.sparqlEscapeString(jobUuid)} ;
+          dct:creator ${mu.sparqlEscapeUri(env.SERVICE_NAME)} ;
+          dct:created ${mu.sparqlEscapeDateTime(now)} ;
+          dct:modified ${mu.sparqlEscapeDateTime(now)} ;
+          task:operation ${mu.sparqlEscapeUri(env.JOB_OPERATION)} ;
+          adms:status ${mu.sparqlEscapeUri(env.STATUS_SCHEDULED)} .
       }
     }
   `;
-  await update(q);
+  await mas.updateSudo(q);
   return jobUri;
 }
 
@@ -56,51 +34,56 @@ export async function createJob() {
  */
 export async function createTask(jobUri) {
   const taskUuid = uuid();
-  const taskUri = `${TASK_URI_PREFIX}${taskUuid}`;
+  const taskUri = `${env.TASK_URI_PREFIX}${taskUuid}`;
   const now = new Date().toISOString();
 
   const q = `
-    ${PREFIXES}
+    ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${sparqlEscapeUri(JOB_GRAPH)} {
-        ${sparqlEscapeUri(taskUri)} a ${sparqlEscapeUri(TASK_TYPE)} ;
-          mu:uuid ${sparqlEscapeString(taskUuid)} ;
-          dct:created ${sparqlEscapeDateTime(now)} ;
-          dct:modified ${sparqlEscapeDateTime(now)} ;
-          task:operation ${sparqlEscapeUri(CHECK_SENT_EMAILS_OPERATION)} ;
-          task:index ${sparqlEscapeString("0")} ;
-          dct:isPartOf ${sparqlEscapeUri(jobUri)} ;
-          adms:status ${sparqlEscapeUri(STATUS_SCHEDULED)} .
+      GRAPH ${mu.sparqlEscapeUri(env.JOB_GRAPH)} {
+        ${mu.sparqlEscapeUri(taskUri)} a ${mu.sparqlEscapeUri(env.TASK_TYPE)} ;
+          mu:uuid ${mu.sparqlEscapeString(taskUuid)} ;
+          dct:created ${mu.sparqlEscapeDateTime(now)} ;
+          dct:modified ${mu.sparqlEscapeDateTime(now)} ;
+          task:operation
+            ${mu.sparqlEscapeUri(env.CHECK_SENT_EMAILS_OPERATION)} ;
+          task:index ${mu.sparqlEscapeString('0')} ;
+          dct:isPartOf ${mu.sparqlEscapeUri(jobUri)} ;
+          adms:status ${mu.sparqlEscapeUri(env.STATUS_SCHEDULED)} .
       }
     }
   `;
-  await update(q);
+  await mas.updateSudo(q);
   return taskUri;
 }
 
 /**
  * Updates the status of the given resource
  */
-export async function updateStatus(uri, status) {
+export async function updateStatus(uri, status, errUri) {
+  const errorTriple = errUri
+    ? `${mu.sparqlEscapeUri(uri)} task:error ${mu.sparqlEscapeUri(errUri)} .`
+    : '';
   const q = `
-    ${PREFIXES}
+    ${env.PREFIXES}
     DELETE {
       GRAPH ?g {
-        ${sparqlEscapeUri(uri)} adms:status ?status .
+        ${mu.sparqlEscapeUri(uri)} adms:status ?status .
       }
     }
     INSERT {
       GRAPH ?g {
-        ${sparqlEscapeUri(uri)} adms:status ${sparqlEscapeUri(status)} .
+        ${mu.sparqlEscapeUri(uri)} adms:status ${mu.sparqlEscapeUri(status)} .
+        ${errorTriple}
       }
     }
     WHERE {
       GRAPH ?g {
-        ${sparqlEscapeUri(uri)} adms:status ?status .
+        ${mu.sparqlEscapeUri(uri)} adms:status ?status .
       }
     }
   `;
-  await update(q);
+  await mas.updateSudo(q);
 }
 
 /**
@@ -108,7 +91,7 @@ export async function updateStatus(uri, status) {
  */
 export async function getNumberOfSentEmailSince(time) {
   const q = `
-    ${PREFIXES}
+    ${env.PREFIXES}
     SELECT DISTINCT ?email
     WHERE {
       GRAPH ?g {
@@ -118,11 +101,11 @@ export async function getNumberOfSentEmailSince(time) {
       GRAPH ?h {
         ?complaint ext:isConvertedIntoEmail ?email .
       }
-      FILTER (STR(?sentDate) >= STR(${sparqlEscapeDateTime(time)}))
+      FILTER (STR(?sentDate) >= STR(${mu.sparqlEscapeDateTime(time)}))
     }
   `;
 
-  const result = await query(q);
+  const result = await mas.querySudo(q);
   return result.results.bindings.length;
 }
 
@@ -131,51 +114,84 @@ export async function getNumberOfSentEmailSince(time) {
  */
 export async function createWarningEmail(taskUri) {
   const containerUuid = uuid();
-  const containerUri = `${CONTAINER_URI_PREFIX}${containerUuid}`;
+  const containerUri = `${env.CONTAINER_URI_PREFIX}${containerUuid}`;
   const emailUuid = uuid();
-  const emailUri = `${EMAIL_URI_PREFIX}${emailUuid}`;
+  const emailUri = `${env.EMAIL_URI_PREFIX}${emailUuid}`;
   const now = new Date().toISOString();
 
   const q = `
-    ${PREFIXES}
+    ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${sparqlEscapeUri(JOB_GRAPH)} {
-        ${sparqlEscapeUri(taskUri)} task:resultsContainer ${sparqlEscapeUri(containerUri)} .
-        ${sparqlEscapeUri(containerUri)} task:hasEmail ${sparqlEscapeUri(emailUri)} .
+      GRAPH ${mu.sparqlEscapeUri(env.JOB_GRAPH)} {
+        ${mu.sparqlEscapeUri(taskUri)}
+          task:resultsContainer
+            ${mu.sparqlEscapeUri(containerUri)} .
+        ${mu.sparqlEscapeUri(containerUri)}
+          task:hasEmail
+            ${mu.sparqlEscapeUri(emailUri)} .
       }
-      GRAPH ${sparqlEscapeUri(EMAIL_GRAPH)} {
-        ${sparqlEscapeUri(emailUri)} a nmo:Email ;
-          mu:uuid ${sparqlEscapeString(emailUuid)} ;
-          nmo:messageFrom ${sparqlEscapeString(EMAIL_FROM)} ;
-          nmo:emailTo ${sparqlEscapeString(EMAIL_TO)} ;
-          nmo:messageSubject ${sparqlEscapeString(WARNING_EMAIL_SUBJECT)} ;
-          nmo:plainTextMessageContent ${sparqlEscapeString(WARNING_EMAIL_TEXT)} ;
-          nmo:htmlMessageContent ${sparqlEscapeString(WARNING_EMAIL_HTML)} ;
-          nmo:sentDate ${sparqlEscapeDateTime(now)} ;
-          nmo:isPartOf ${sparqlEscapeUri(OUTBOX)} .
+      GRAPH ${mu.sparqlEscapeUri(env.EMAIL_GRAPH)} {
+        ${mu.sparqlEscapeUri(emailUri)} a nmo:Email ;
+          mu:uuid ${mu.sparqlEscapeString(emailUuid)} ;
+          nmo:messageFrom ${mu.sparqlEscapeString(env.EMAIL_FROM)} ;
+          nmo:emailTo ${mu.sparqlEscapeString(env.EMAIL_TO)} ;
+          nmo:messageSubject
+            ${mu.sparqlEscapeString(env.WARNING_EMAIL_SUBJECT)} ;
+          nmo:plainTextMessageContent
+            ${mu.sparqlEscapeString(env.WARNING_EMAIL_TEXT)} ;
+          nmo:htmlMessageContent
+            ${mu.sparqlEscapeString(env.WARNING_EMAIL_HTML)} ;
+          nmo:sentDate ${mu.sparqlEscapeDateTime(now)} ;
+          nmo:isPartOf ${mu.sparqlEscapeUri(env.OUTBOX)} .
       }
     }
   `;
-  const result = await update(q);
+  await mas.updateSudo(q);
 }
 
 /**
- * Adds an error resource to the given job
+ * Stores an error and links to a given Job and/or Task
  */
-export async function addError(jobUri, error) {
-  const errorUuid = uuid();
-  const errorUri = `${ERROR_URI_PREFIX}${errorUuid}`;
+export async function sendErrorAlert(message, detail, task, job) {
+  const id = uuid();
+  const uri = `${env.ERROR_URI_PREFIX}${id}`;
+  const subject = 'Error - Complaint Form Warning Service';
+  const referenceJobTriple = job
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(job)} .`
+    : '';
+  const referenceTaskTriple = task
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(task)} .`
+    : '';
+  const detailTriple = detail
+    ? `${mu.sparqlEscapeUri(uri)}
+         oslc:largePreview ${mu.sparqlEscapeString(detail)} .`
+    : '';
 
-  const q = `
-    ${PREFIXES}
+  const insertErrorQuery = `
+    ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${sparqlEscapeUri(JOB_GRAPH)} {
-        ${sparqlEscapeUri(jobUri)} task:error ${sparqlEscapeUri(errorUri)} .
-        ${sparqlEscapeUri(errorUri)} a oslc:Error ;
-          mu:uuid ${sparqlEscapeString(errorUuid)} ;
-          oslc:message ${sparqlEscapeString(error)} .
+      GRAPH ${mu.sparqlEscapeUri(env.ERROR_GRAPH)} {
+        ${mu.sparqlEscapeUri(uri)}
+          rdf:type oslc:Error ;
+          mu:uuid ${mu.sparqlEscapeString(id)} ;
+          dct:subject ${mu.sparqlEscapeString(subject)} ;
+          oslc:message ${mu.sparqlEscapeString(message)} ;
+          dct:created ${mu.sparqlEscapeDateTime(new Date().toISOString())} ;
+          dct:creator ${mu.sparqlEscapeUri(env.SERVICE_NAME)} .
+        ${referenceJobTriple}
+        ${referenceTaskTriple}
+        ${detailTriple}
       }
-    }
-  `;
-  await update(q);
+    }`;
+  try {
+    await mas.updateSudo(insertErrorQuery);
+    return uri;
+  } catch (e) {
+    console.error(
+      `[ERROR] Something went wrong while trying to store an error.\nMessage: ${e}\nQuery: ${insertErrorQuery}`,
+    );
+    throw e;
+  }
 }

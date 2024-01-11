@@ -1,11 +1,8 @@
 {
   "name": "complaint-form-warning-service",
-  "version": "0.0.3",
+  "version": "1.0.1",
   "description": "Service that generates warning emails when no complaints are sent during the day",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lblod/complaint-form-warning-service.git"
@@ -13,7 +10,20 @@
   "author": "lblod",
   "license": "MIT",
   "dependencies": {
-    "@lblod/mu-auth-sudo": "^0.2.0",
-    "cron": "^1.8.2"
+    "@lblod/mu-auth-sudo": "^0.6.1",
+    "cron": "^3.1.6",
+    "env-var": "^7.4.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0"
+  },
+  "scripts": {
+    "lint:js": "eslint . --cache",
+    "lint:js:fix": "eslint . --cache --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

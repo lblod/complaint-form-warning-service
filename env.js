@@ -1,26 +1,55 @@
-export const STATUS_BUSY = 'http://redpencil.data.gift/id/concept/JobStatus/busy';
-export const STATUS_SCHEDULED = 'http://redpencil.data.gift/id/concept/JobStatus/scheduled';
-export const STATUS_SUCCESS = 'http://redpencil.data.gift/id/concept/JobStatus/success';
-export const STATUS_FAILED = 'http://redpencil.data.gift/id/concept/JobStatus/failed';
+import envvar from 'env-var';
 
-export const JOB_GRAPH = 'http://mu.semte.ch/graphs/harvesting';
-export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email'
+export const RUN_MODE = envvar.get('NODE_ENV').default('production').asString();
+
+// Every weekday at 14h CET
+export const FIRST_CHECK_CRON = envvar
+  .get('FIRST_CHECK_CRON')
+  .default('0 0 14 * * 1-5')
+  .asString();
+// Every weekday at 16h CET
+export const SECOND_CHECK_CRON = envvar
+  .get('SECOND_CHECK_CRON')
+  .default('0 0 16 * * 1-5')
+  .asString();
+
+export const EMAIL_FROM = envvar.get('EMAIL_FROM').required().asString();
+export const EMAIL_TO = envvar.get('EMAIL_TO').required().asString();
+
+export const STATUS_BUSY =
+  'http://redpencil.data.gift/id/concept/JobStatus/busy';
+export const STATUS_SCHEDULED =
+  'http://redpencil.data.gift/id/concept/JobStatus/scheduled';
+export const STATUS_SUCCESS =
+  'http://redpencil.data.gift/id/concept/JobStatus/success';
+export const STATUS_FAILED =
+  'http://redpencil.data.gift/id/concept/JobStatus/failed';
+
+export const JOB_GRAPH = 'http://mu.semte.ch/graphs/jobs';
+export const EMAIL_GRAPH = 'http://mu.semte.ch/graphs/system/email';
+export const ERROR_GRAPH = 'http://mu.semte.ch/graphs/error';
 
 export const JOB_TYPE = 'http://vocab.deri.ie/cogs#Job';
 export const TASK_TYPE = 'http://redpencil.data.gift/vocabularies/tasks/Task';
-export const ERROR_TYPE= 'http://open-services.net/ns/core#Error';
+export const ERROR_TYPE = 'http://open-services.net/ns/core#Error';
 
 export const JOB_URI_PREFIX = 'http://redpencil.data.gift/id/job/';
 export const TASK_URI_PREFIX = 'http://redpencil.data.gift/id/task/';
 export const ERROR_URI_PREFIX = 'http://redpencil.data.gift/id/jobs/error/';
 export const EMAIL_URI_PREFIX = 'http://data.lblod.info/id/emails/';
-export const CONTAINER_URI_PREFIX = 'http://redpencil.data.gift/id/dataContainers/'
+export const CONTAINER_URI_PREFIX =
+  'http://redpencil.data.gift/id/dataContainers/';
 
-export const SERVICE_NAME = 'http://lblod.data.gift/services/complaint-form-warning-service';
-export const JOB_OPERATION = 'http://lblod.data.gift/id/jobs/concept/JobOperation/complaintFormWarning';
-export const CHECK_SENT_EMAILS_OPERATION = 'http://lblod.data.gift/id/jobs/concept/JobOperation/checkSentEmails';
+export const SERVICE_NAME =
+  'http://lblod.data.gift/services/complaint-form-warning-service';
+export const JOB_OPERATION =
+  'http://lblod.data.gift/id/jobs/concept/JobOperation/complaintFormWarning';
+export const CHECK_SENT_EMAILS_OPERATION =
+  'http://lblod.data.gift/id/jobs/concept/JobOperation/checkSentEmails';
 
 export const PREFIXES = `
+  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+  PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
   PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
   PREFIX task: <http://redpencil.data.gift/vocabularies/tasks/>
   PREFIX dct: <http://purl.org/dc/terms/>
