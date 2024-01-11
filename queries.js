@@ -1,12 +1,13 @@
 import * as env from './env';
 import * as mas from '@lblod/mu-auth-sudo';
 import * as mu from 'mu';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Creates a new job in the store
  */
 export async function createJob() {
-  const jobUuid = mu.uuid();
+  const jobUuid = uuid();
   const jobUri = `${env.JOB_URI_PREFIX}${jobUuid}`;
   const now = new Date().toISOString();
 
@@ -32,7 +33,7 @@ export async function createJob() {
  * Creates a new task linked to a job in the store
  */
 export async function createTask(jobUri) {
-  const taskUuid = mu.uuid();
+  const taskUuid = uuid();
   const taskUri = `${env.TASK_URI_PREFIX}${taskUuid}`;
   const now = new Date().toISOString();
 
@@ -59,7 +60,10 @@ export async function createTask(jobUri) {
 /**
  * Updates the status of the given resource
  */
-export async function updateStatus(uri, status) {
+export async function updateStatus(uri, status, errUri) {
+  const errorTriple = errUri
+    ? `${mu.sparqlEscapeUri(uri)} task:error ${mu.sparqlEscapeUri(errUri)} .`
+    : '';
   const q = `
     ${env.PREFIXES}
     DELETE {
@@ -70,6 +74,7 @@ export async function updateStatus(uri, status) {
     INSERT {
       GRAPH ?g {
         ${mu.sparqlEscapeUri(uri)} adms:status ${mu.sparqlEscapeUri(status)} .
+        ${errorTriple}
       }
     }
     WHERE {
@@ -108,9 +113,9 @@ export async function getNumberOfSentEmailSince(time) {
  * Creates a warning email in the store and put it in the outbox
  */
 export async function createWarningEmail(taskUri) {
-  const containerUuid = mu.uuid();
+  const containerUuid = uuid();
   const containerUri = `${env.CONTAINER_URI_PREFIX}${containerUuid}`;
-  const emailUuid = mu.uuid();
+  const emailUuid = uuid();
   const emailUri = `${env.EMAIL_URI_PREFIX}${emailUuid}`;
   const now = new Date().toISOString();
 
@@ -145,23 +150,48 @@ export async function createWarningEmail(taskUri) {
 }
 
 /**
- * Adds an error resource to the given job
+ * Stores an error and links to a given Job and/or Task
  */
-export async function addError(jobUri, error) {
-  const errorUuid = mu.uuid();
-  const errorUri = `${env.ERROR_URI_PREFIX}${errorUuid}`;
+export async function sendErrorAlert(message, detail, task, job) {
+  const id = uuid();
+  const uri = `${env.ERROR_URI_PREFIX}${id}`;
+  const subject = 'Error - Complaint Form Warning Service';
+  const referenceJobTriple = job
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(job)} .`
+    : '';
+  const referenceTaskTriple = task
+    ? `${mu.sparqlEscapeUri(uri)}
+         dct:references ${mu.sparqlEscapeUri(task)} .`
+    : '';
+  const detailTriple = detail
+    ? `${mu.sparqlEscapeUri(uri)}
+         oslc:largePreview ${mu.sparqlEscapeString(detail)} .`
+    : '';
 
-  const q = `
+  const insertErrorQuery = `
     ${env.PREFIXES}
     INSERT DATA {
-      GRAPH ${mu.sparqlEscapeUri(env.JOB_GRAPH)} {
-        ${mu.sparqlEscapeUri(jobUri)}
-          task:error ${mu.sparqlEscapeUri(errorUri)} .
-        ${mu.sparqlEscapeUri(errorUri)} a oslc:Error ;
-          mu:uuid ${mu.sparqlEscapeString(errorUuid)} ;
-          oslc:message ${mu.sparqlEscapeString(error)} .
+      GRAPH ${mu.sparqlEscapeUri(env.ERROR_GRAPH)} {
+        ${mu.sparqlEscapeUri(uri)}
+          rdf:type oslc:Error ;
+          mu:uuid ${mu.sparqlEscapeString(id)} ;
+          dct:subject ${mu.sparqlEscapeString(subject)} ;
+          oslc:message ${mu.sparqlEscapeString(message)} ;
+          dct:created ${mu.sparqlEscapeDateTime(new Date().toISOString())} ;
+          dct:creator ${mu.sparqlEscapeUri(env.SERVICE_NAME)} .
+        ${referenceJobTriple}
+        ${referenceTaskTriple}
+        ${detailTriple}
       }
-    }
-  `;
-  await mas.updateSudo(q);
+    }`;
+  try {
+    await mas.updateSudo(insertErrorQuery);
+    return uri;
+  } catch (e) {
+    console.error(
+      `[ERROR] Something went wrong while trying to store an error.\nMessage: ${e}\nQuery: ${insertErrorQuery}`,
+    );
+    throw e;
+  }
 }
