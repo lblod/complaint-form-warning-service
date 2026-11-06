@@ -2,6 +2,7 @@ import * as env from './env';
 import * as que from './queries';
 import { app, errorHandler } from 'mu';
 import { CronJob } from 'cron';
+import { DateTime } from 'luxon';
 
 app.get('/', function (req, res) {
   res.send('Hello from complaint-form-warning :)');
@@ -74,15 +75,11 @@ async function checkSentEmails() {
     try {
       await que.updateStatus(jobUri, env.STATUS_BUSY);
       await que.updateStatus(taskUri, env.STATUS_BUSY);
-      const now = new Date();
-      const startOfBusinessDay = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        8,
-        0,
-        0,
-      ); // today at 8h
+      const startOfBusinessDay = DateTime.now()
+        .setZone('Europe/Brussels')
+        .startOf('day')
+        .set({ hour: 8 })
+        .toJSDate(); // today at 8h
       const numberOfSentEmails =
         await que.getNumberOfSentEmailSince(startOfBusinessDay);
 
