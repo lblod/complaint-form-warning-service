@@ -101,7 +101,7 @@ export async function getNumberOfSentEmailSince(time) {
       GRAPH ?h {
         ?complaint ext:isConvertedIntoEmail ?email .
       }
-      FILTER (STR(?sentDate) >= STR(${mu.sparqlEscapeDateTime(time)}))
+      FILTER (?sentDate >= ${mu.sparqlEscapeDateTime(time)})
     }
   `;
 
